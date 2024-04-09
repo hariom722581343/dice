@@ -9,33 +9,27 @@ import java.util.List;
 @Service
 public class TwitterService {
 
-    private final Twitter twitter;
+    private RestTemplate restTemplate;
+    private final String TWITTER_API_URL = "https://api.twitter.com/1.1";
 
-    public TwitterService() {
-        // Initialize Twitter instance with your API credentials
-        String consumerKey = "YOUR_CONSUMER_KEY";
-        String consumerSecret = "YOUR_CONSUMER_SECRET";
-        String accessToken = "YOUR_ACCESS_TOKEN";
-        String accessTokenSecret = "YOUR_ACCESS_TOKEN_SECRET";
-
-        twitter = new TwitterFactory().getInstance();
-        twitter.setOAuthConsumer(consumerKey, consumerSecret);
-        AccessToken token = new AccessToken(accessToken, accessTokenSecret);
-        twitter.setOAuthAccessToken(token);
+    @Autowired
+    public TwitterService(RestTemplate restTemplate) {
+        this.restTemplate = restTemplate;
     }
 
-    public List<Status> searchTweets(String query) throws TwitterException {
-        // Perform search for tweets based on the query
-        Query twitterQuery = new Query(query);
-        QueryResult result = twitter.search(twitterQuery);
-        return result.getTweets();
+    public ResponseEntity<Object> searchTweetUser(String username) {
+        HttpHeaders headers = new HttpHeaders();
+        headers.set("Authorization", "Bearer YOUR_TWITTER_API_KEY");
+        HttpEntity<String> entity = new HttpEntity<>(headers);
+        String url = TWITTER_API_URL + "/search/tweets.json?q=" + username;
+        return restTemplate.exchange(url, HttpMethod.GET, entity, Object.class);
     }
 
-    public List<Status> getUserTweets(String userId) throws TwitterException {
-        // Get tweets of a specific user
-        Paging paging = new Paging(1, 200); // Adjust count as per your requirement
-        return twitter.getUserTimeline(userId, paging);
+    public ResponseEntity<Object> getTweetsOfUser(String userId) {
+        HttpHeaders headers = new HttpHeaders();
+        headers.set("Authorization", "Bearer YOUR_TWITTER_API_KEY");
+        HttpEntity<String> entity = new HttpEntity<>(headers);
+        String url = TWITTER_API_URL + "/statuses/user_timeline.json?user_id=" + userId;
+        return restTemplate.exchange(url, HttpMethod.GET, entity, Object.class);
     }
 }
-
-
